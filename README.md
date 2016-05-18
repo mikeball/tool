@@ -23,9 +23,9 @@ cljs <script_id>
 ## Implementation
 
 - `src/` - top-level tool implemented in ClojureScript on Node.js
-- `target/cdr.jar/` - minimal java tool for resolving dependencies ([source](https://github.com/shaunlebron/clojure-dep-resolver))
-- `script/` - clojure "scripts" for accessing cljs compiler
-
+- `target/cdr.jar` - minimal java tool for resolving dependencies ([source](https://github.com/shaunlebron/clojure-dep-resolver))
+- `target/script/` - clojure "scripts" for accessing cljs compiler
+- `target/cljs-<version>.jar` - cljs uberjar for fast starting production compiler (auto-downloaded)
 
 ## Setup
 
