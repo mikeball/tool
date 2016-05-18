@@ -8,13 +8,14 @@
     "clojurescript"
   ],
   "bin": {
-    "cljs" : "target/tool.js"
+    "cljs": "target/tool.js"
   },
   "files": [
     "README.md",
     "target"
   ],
   "dependencies": {
+    "argsplit": "1.0.5",
     "colors": "1.1.2",
     "exists-sync": "0.0.3",
     "fs-extra": "0.28.0",

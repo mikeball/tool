@@ -37,6 +37,7 @@
 (def child-process (js/require "child_process"))
 (def spawn-sync (.-spawnSync child-process))
 (def exec-sync (.-execSync child-process))
+(def argsplit (js/require "argsplit"))
 
 (defn exit-error [& args]
   (apply js/console.error args)
@@ -176,8 +177,22 @@
       #js["-cp" (build-classpath build) "clojure.main" file-repl]
       #js{:stdio "inherit"})))
 
-(defn custom-script [id]
-  (exec-sync (ensure-cmd! id) #js{:stdio "inherit"}))
+(defn task-custom-script [id user-args]
+  (let [full-cmd (ensure-cmd! id)
+        [script & args] (vec (argsplit full-cmd))
+        clojure? (string/ends-with? script ".clj")]
+    (if-not clojure?
+      (exec-sync full-cmd #js{:stdio "inherit"})
+      (do
+        (ensure-java!)
+        (spawn-sync "java"
+          (as-> ["-cp" (build-classpath nil)
+                 "clojure.main"
+                 "-e" (str "(and (def ^:dynamic *cljs-config* " (pr-str config) ") nil)")
+                 script] $
+                (concat $ args user-args)
+                (apply array $))
+          #js{:stdio "inherit"})))))
 
 (defn print-welcome []
   (println)
@@ -185,16 +200,16 @@
                 (io/color :grey " ClojureScript starting...")))
   (println))
 
-(defn -main [task id]
+(defn -main [task & args]
   (print-welcome)
   (set! config (ensure-config!))
   (ensure-cljs-version!)
   (cond
     (= task "install") (task-install)
-    (= task "build") (task-script id file-build)
-    (= task "watch") (task-script id file-watch)
-    (= task "repl") (task-repl id)
-    :else (custom-script task)))
+    (= task "build") (task-script (first args) file-build)
+    (= task "watch") (task-script (first args) file-watch)
+    (= task "repl") (task-repl (first args))
+    :else (task-custom-script task args)))
 
 (set! *main-cli-fn* -main)
 (enable-console-print!)
