@@ -20,13 +20,12 @@
 (def file-config-edn "cljs.edn")
 (def file-config-json "cljs.json")
 (def file-deps-cache ".deps-cache.edn")
-(def file-dep-retriever (str js/__dirname "/../dep-retriever/target/dep-retriever-0.1.0-standalone.jar"))
-(def file-build (str js/__dirname "/../script/build.clj"))
-(def file-watch (str js/__dirname "/../script/watch.clj"))
-(def file-repl (str js/__dirname "/../script/repl.clj"))
+(def file-dep-retriever (str js/__dirname "/cdr.jar"))
+(def file-build (str js/__dirname "/script/build.clj"))
+(def file-watch (str js/__dirname "/script/watch.clj"))
+(def file-repl (str js/__dirname "/script/repl.clj"))
 
-(def dir-cljs-jars (str js/__dirname "/../cljs-jars/"))
-(defn file-cljs-jar [version] (str dir-cljs-jars version ".jar"))
+(defn file-cljs-jar [version] (str js/__dirname "/cljs-" version ".jar"))
 (defn url-cljs-jar [version] (str "https://github.com/clojure/clojurescript/releases/download/r" version "/cljs.jar"))
 
 ;;---------------------------------------------------------------------------
@@ -114,7 +113,6 @@
         jar-url (url-cljs-jar version)]
     (or (io/path-exists? jar-path)
         (do (println "Downloading ClojureScript version" version)
-            (io/mkdirs dir-cljs-jars)
             (io/download jar-url jar-path)))))
 
 (defn ensure-cmd! [id]

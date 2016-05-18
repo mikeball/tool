@@ -12,9 +12,7 @@
   },
   "files": [
     "README.md",
-    "target/tool.js",
-    "dep-retriever/target/dep-retriever-0.1.0-standalone.jar",
-    "script"
+    "target"
   ],
   "dependencies": {
     "colors": "1.1.2",
