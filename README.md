@@ -29,16 +29,16 @@ cljs <script_id>
 
 ## Setup
 
-Install some prerequisites:
-
-```
-$ npm install
-$ pushd dep-retriever; lein uberjar; popd
-```
-
-And build the tool (it builds itself):
+After installing `cljs` using npm as mentioned, you can use it to build a local
+copy.
 
 ```
 $ cljs build tool
 ```
 
+From there, you can use the local copy to build itself again if you like:
+
+```
+$ npm install
+$ ./cljs build tool
+```
