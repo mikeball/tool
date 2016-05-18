@@ -1,0 +1,25 @@
+{
+  "name": "cljs",
+  "version": "0.1.0",
+  "description": "ClojureScript compiler tool",
+  "author": "Shaun LeBron <shaunewilliams@gmail.com> (github.com/shaunlebron)",
+  "keywords": [
+    "cljs",
+    "clojurescript"
+  ],
+  "bin": {
+    "cljs" : "target/tool.js"
+  },
+  "files": [
+    "README.md",
+    "target/tool.js",
+    "dep-retriever/target/dep-retriever-0.1.0-standalone.jar",
+    "script"
+  ],
+  "dependencies": {
+    "colors": "1.1.2",
+    "exists-sync": "0.0.3",
+    "fs-extra": "0.28.0",
+    "sync-request": "3.0.0"
+  }
+}
