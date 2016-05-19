@@ -14,9 +14,9 @@ npm install -g git+https://github.com/shaunlebron/npm-cljs.git
 
 ```
 cljs install
+cljs repl
 cljs build <id>
 cljs watch <id>
-cljs repl [<id>]
 cljs <script_id>
 ```
 

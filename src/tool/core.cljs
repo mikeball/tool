@@ -170,18 +170,18 @@
       #js["-cp" (build-classpath (:src build)) "clojure.main" file-script (pr-str build)]
       #js{:stdio "inherit"})))
 
-(defn task-repl [id]
-  (ensure-java!)
-  (let [build (when id (ensure-build! id))]
-    (spawn-sync "java"
-      #js["-cp" (build-classpath (:src build)) "clojure.main" file-repl]
-      #js{:stdio "inherit"})))
-
 (defn all-sources []
   (->> (:builds config)
+       (vals)
        (map :src)
        (filter identity)
        (flatten)))
+
+(defn task-repl [id]
+  (ensure-java!)
+  (spawn-sync "java"
+    #js["-cp" (build-classpath (all-sources)) "clojure.main" file-repl]
+    #js{:stdio "inherit"}))
 
 (defn task-custom-script [id user-args]
   (let [full-cmd (ensure-cmd! id)
