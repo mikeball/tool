@@ -155,7 +155,7 @@
         (io/spit file-deps-cache (with-out-str (pprint cache)))
         cache))))
 
-(defn build-classpath [{:keys [src] :as build}]
+(defn build-classpath [src]
   (let [{:keys [jars]} (ensure-dependencies!)
         source-paths (when src (if (sequential? src) src [src]))
         cljs-jar (file-cljs-jar (:cljs-version config))
@@ -167,15 +167,21 @@
   (ensure-java!)
   (let [build (ensure-build! id)]
     (spawn-sync "java"
-      #js["-cp" (build-classpath build) "clojure.main" file-script (pr-str build)]
+      #js["-cp" (build-classpath (:src build)) "clojure.main" file-script (pr-str build)]
       #js{:stdio "inherit"})))
 
 (defn task-repl [id]
   (ensure-java!)
   (let [build (when id (ensure-build! id))]
     (spawn-sync "java"
-      #js["-cp" (build-classpath build) "clojure.main" file-repl]
+      #js["-cp" (build-classpath (:src build)) "clojure.main" file-repl]
       #js{:stdio "inherit"})))
+
+(defn all-sources []
+  (->> (:builds config)
+       (map :src)
+       (filter identity)
+       (flatten)))
 
 (defn task-custom-script [id user-args]
   (let [full-cmd (ensure-cmd! id)
@@ -186,7 +192,7 @@
       (do
         (ensure-java!)
         (spawn-sync "java"
-          (as-> ["-cp" (build-classpath nil)
+          (as-> ["-cp" (build-classpath (all-sources))
                  "clojure.main"
                  "-e" (str "(and (def ^:dynamic *cljs-config* " (pr-str config) ") nil)")
                  script] $
