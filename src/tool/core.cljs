@@ -134,20 +134,19 @@
 
 (defn task-custom-script [id user-args]
   (let [full-cmd (ensure-cmd! id)
-        [script & args] (vec (argsplit full-cmd))
+        [script & prefilled-args] (vec (argsplit full-cmd))
         clojure? (string/ends-with? script ".clj")]
     (if-not clojure?
       (exec-sync full-cmd #js{:stdio "inherit"})
       (do
         (ensure-java!)
-        (spawn-sync "java"
-          (as-> ["-cp" (build-classpath (all-sources))
-                 "clojure.main"
-                 "-e" (str "(and (def ^:dynamic *cljs-config* " (pr-str config) ") nil)")
-                 script] $
-                (concat $ args user-args)
-                (apply array $))
-          #js{:stdio "inherit"})))))
+        (let [classpath (build-classpath (all-sources))
+              onload (str "(do (def ^:dynamic *cljs-config* (quote " config ")) nil)")
+              args (concat
+                     ["-cp" classpath "clojure.main" "-e" onload script]
+                     prefilled-args
+                     user-args)]
+          (spawn-sync "java" (clj->js args) #js{:stdio "inherit"}))))))
 
 (defn print-welcome []
   (println)
