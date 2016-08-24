@@ -1,3 +1,3 @@
 #!/bin/sh
 
-node target/tool.js "$@"
+node $(dirname "$0")/target/tool.js "$@"
