@@ -2,8 +2,8 @@
 
 > __NOTE__: This is still experimental.
 
-A minimal ClojureScript build tool using a [standard config file], `cljs.edn` or
-`cljs.json`.  It provides a layer over the [Quick Start] scripts to provide
+A minimal ClojureScript build tool using a [standard config file], `cljs.edn`.
+It provides a layer over the [Quick Start] scripts to provide
 dependency management and a central config.
 
 [standard config file]:https://github.com/shaunlebron/standardized-cljs/

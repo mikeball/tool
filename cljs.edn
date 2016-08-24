@@ -1,0 +1,5 @@
+{:cljs-version "1.9.225"
+ :builds {:tool {:src "src"
+                 :compiler {:target :nodejs
+                            :optimizations :simple
+                            :output-to "target/tool.js"}}}}
