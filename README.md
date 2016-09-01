@@ -6,10 +6,10 @@ A minimal ClojureScript build tool using a [standard config file], `cljs.edn`.
 It provides a layer over the [Quick Start] scripts to provide
 dependency management and a central config.
 
-[standard config file]:https://github.com/shaunlebron/standardized-cljs/
+[standard config file]:https://github.com/cljs/config-spec/
 
 ```
-npm install -g git+https://github.com/shaunlebron/npm-cljs.git
+npm install -g git+https://github.com/cljs/tool.git
 ```
 
 ```
@@ -25,7 +25,7 @@ cljs <script_id>
 ## Implementation
 
 - `src/` - top-level tool implemented in ClojureScript on Node.js
-- `target/cdr.jar` - minimal java tool for resolving dependencies ([source](https://github.com/shaunlebron/clojure-dep-resolver))
+- `target/cdr.jar` - minimal java tool for resolving dependencies ([source](https://github.com/cljs/dep-resolver))
 - `target/script/` - clojure "scripts" for accessing cljs compiler
 - `target/cljs-<version>.jar` - cljs uberjar for fast starting production compiler (auto-downloaded)
 
