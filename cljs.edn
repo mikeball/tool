@@ -1,4 +1,5 @@
-{:cljs-version "1.9.225"
+{:cljs-version "1.9.386"
+ :dev-dependencies [[figwheel-sidecar "0.5.4-7"]]
  :builds {:tool {:src "src"
                  :compiler {:target :nodejs
                             :optimizations :simple
