@@ -1,6 +1,6 @@
 # npm cljs
 
-> __NOTE__: This is still experimental.
+> __NOTE__: Still experimental and unpublished.
 
 A minimal ClojureScript build tool using a [standard config file], `cljs.edn`.
 It provides a layer over the [Quick Start] scripts to provide
@@ -8,8 +8,10 @@ dependency management and a central config.
 
 [standard config file]:https://github.com/cljs/config-spec/
 
+If you have a package.json file, you can run the following.  Or add `-g` to install globally.
+
 ```
-npm install -g git+https://github.com/cljs/tool.git
+npm install cljs/tool#0.0.1
 ```
 
 ```
@@ -29,7 +31,7 @@ cljs <script_id>
 - `target/script/` - clojure "scripts" for accessing cljs compiler
 - `target/cljs-<version>.jar` - cljs uberjar for fast starting production compiler (auto-downloaded)
 
-## Setup
+## Development Setup
 
 After installing `cljs` using npm as mentioned, you can use it to build a local
 copy.
