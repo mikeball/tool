@@ -18,7 +18,7 @@
 
 (defn base-deps []
   {:dependencies [['org.clojure/clojurescript (:cljs-version config)]]
-   :dev-dependencies []})
+   :dev-dependencies [['figwheel-sidecar "0.5.8"]]})
 
 ;; filenames
 (def file-config-edn "cljs.edn")

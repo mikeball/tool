@@ -1,5 +1,7 @@
 (require '[cljs.build.api :as b]
-         '[clojure.edn :as edn])
+         '[clojure.edn :as edn]
+         '[figwheel-sidecar.cljs-utils.exception-parsing :refer [print-exception]]
+         '[figwheel-sidecar.build-middleware.notifications :refer [warning-message-handler]])
 
 (def build (edn/read-string (first *command-line-args*)))
 
@@ -7,5 +9,10 @@
 
 (let [start (System/nanoTime)
       {:keys [src compiler]} build]
-  (b/build src compiler)
-  (println "... done. Elapsed" (/ (- (System/nanoTime) start) 1e9) "seconds"))
+  (binding [cljs.analyzer/*cljs-warning-handlers* [(warning-message-handler identity)]]
+    (try
+      (b/build src
+        (assoc compiler :watch-error-fn #(print-exception %)))
+      (catch Throwable e
+        (print-exception e)))
+    (println "... done. Elapsed" (/ (- (System/nanoTime) start) 1e9) "seconds")))
