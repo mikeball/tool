@@ -1,48 +1,57 @@
-# npm cljs
+> __NOTE__: work in progress
 
-> __NOTE__: Still experimental and unpublished.
+# ClojureScript starter tool
 
-A minimal ClojureScript build tool using a [standard config file], `cljs.edn`.
-It provides a layer over the [Quick Start] scripts to provide
-dependency management and a central config.
-
-[standard config file]:https://github.com/cljs/config-spec/
-
-If you have a package.json file, you can run the following.  Or add `-g` to install globally.
+A very small tool for introducing ClojureScript as quickly as possible.
 
 ```
-npm install cljs/tool#0.0.1
+npm install cljs/tool -g
 ```
 
-```
-cljs install
-cljs repl
-cljs build <id>
-cljs watch <id>
-cljs <script_id>
-```
+## Basic Expectations
 
-[Quick Start]:https://github.com/clojure/clojurescript/wiki/Quick-Start
+Fast REPL and scripting provided by [Lumo].
 
-## Implementation
-
-- `src/` - top-level tool implemented in ClojureScript on Node.js
-- `target/cdr.jar` - minimal java tool for resolving dependencies ([source](https://github.com/cljs/dep-resolver))
-- `target/script/` - clojure "scripts" for accessing cljs compiler
-- `target/cljs-<version>.jar` - cljs uberjar for fast starting production compiler (auto-downloaded)
-
-## Development Setup
-
-After installing `cljs` using npm as mentioned, you can use it to build a local
-copy.
-
-```
-$ cljs build tool
+```sh
+$ cljs               # REPL
+$ cljs my_file.cljs  # Run as script
 ```
 
-From there, you can use the local copy to build itself again if you like:
+## Full Compiler
 
+Compile projects using the production-level JVM ClojureScript compiler.
+Full Maven dependency resolution. Errors and warnings are prettified by [Figwheel]'s
+sidecar library. (User will be asked to install Java if not detected.)
+
+```sh
+$ cljs install       # install dependencies
+$ cljs build <id>    # build the target <id>
+$ cljs watch <id>    # build and watch for changes
+$ cljs repl          # run a project REPL
+
+$ cljs my_build_script.clj  # (advanced: run your own build script using compiler API)
 ```
-$ npm install
-$ ./cljs build tool
+
+## Plain Config
+
+Plain data project config expected under `cljs.edn`:
+
+```edn
+{; Specify the ClojureScript version you want to use.
+ :cljs-version "1.9.456"
+
+ ; Dependencies go here (same format as lein/boot).
+ :dependencies []
+ :dev-dependencies []
+
+ ; Builds
+ :builds
+   {:main ; <-- name of this build
+     {:src "src" ; <-- source directories passed to compiler
+      :compiler ; <-- options passed to compiler
+       {:output-to "target/main.js"
+        :optimizations :simple}}}}
 ```
+
+[Lumo]:https://github.com/anmonteiro/lumo
+[Figwheel]:https://github.com/bhauman/lein-figwheel
