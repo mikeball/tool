@@ -35,7 +35,7 @@
 (def npmRun (js/require "npm-run"))
 (defn run-lumo
   ([] (npmRun.spawnSync "lumo" #js{:stdio "inherit"}))
-  ([filename] (npmRun.spawnSync "lumo" #js[filename] #js{:stdio "inherit"})))
+  ([filename args] (npmRun.spawnSync "lumo" (apply array (cons filename args)) #js{:stdio "inherit"})))
 
 ;;---------------------------------------------------------------------------
 ;; Misc
@@ -150,7 +150,7 @@
 (defn -main [task & args]
   (cond
     (nil? task) (do (print-welcome) (run-lumo))
-    (string/ends-with? task ".cljs") (run-lumo task)
+    (string/ends-with? task ".cljs") (run-lumo task args)
     :else
     (do
       (print-welcome)
