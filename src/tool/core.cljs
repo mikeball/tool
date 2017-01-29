@@ -67,10 +67,6 @@
   (or (io/slurp-edn file-config-edn)
       (exit-error "No config found. Please create one in" file-config-edn)))
 
-(defn ensure-cmd! [id]
-  (or (get-in config [:scripts (keyword id)])
-      (exit-error (str "Unrecognized command: '" id "' is not found in :scripts map"))))
-
 (defn ensure-build! [id]
   (or (get-in config [:builds (keyword id)])
       (exit-error (str "Unrecognized build: '" id "' is not found in :builds map"))))
@@ -138,21 +134,12 @@
     #js["-cp" (build-classpath (all-sources)) "clojure.main" file-repl]
     #js{:stdio "inherit"}))
 
-(defn task-custom-script [id user-args]
-  (let [full-cmd (ensure-cmd! id)
-        [script & prefilled-args] (vec (argsplit full-cmd))
-        clojure? (string/ends-with? script ".clj")]
-    (if-not clojure?
-      (exec-sync full-cmd #js{:stdio "inherit"})
-      (do
-        (ensure-java!)
-        (let [classpath (build-classpath (all-sources))
-              onload (str "(do (def ^:dynamic *cljs-config* (quote " config ")) nil)")
-              args (concat
-                     ["-cp" classpath "clojure.main" "-e" onload script]
-                     prefilled-args
-                     user-args)]
-          (spawn-sync "java" (clj->js args) #js{:stdio "inherit"}))))))
+(defn task-custom-script [path user-args]
+  (ensure-java!)
+  (let [classpath (build-classpath (all-sources))
+        onload (str "(do (def ^:dynamic *cljs-config* (quote " config ")) nil)")
+        args (concat ["-cp" classpath "clojure.main" "-e" onload path] user-args)]
+    (spawn-sync "java" (clj->js args) #js{:stdio "inherit"})))
 
 (defn print-welcome []
   (println)
@@ -173,7 +160,8 @@
         (= task "build") (task-script (first args) file-build)
         (= task "watch") (task-script (first args) file-watch)
         (= task "repl") (task-repl (first args))
-        :else (task-custom-script task args)))))
+        (string/ends-with? task ".clj") (task-custom-script task args)
+        :else (exit-error "Unrecognized task:" task)))))
 
 (set! *main-cli-fn* -main)
 (enable-console-print!)
