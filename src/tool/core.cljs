@@ -16,6 +16,10 @@
   [[:compiler :optimizations]
    [:compiler :target]])
 
+(defn base-deps []
+  {:dependencies [['org.clojure/clojurescript (:cljs-version config)]]
+   :dev-dependencies []})
+
 ;; filenames
 (def file-config-edn "cljs.edn")
 (def file-deps-cache ".deps-cache.edn")
@@ -23,9 +27,6 @@
 (def file-build (str js/__dirname "/script/build.clj"))
 (def file-watch (str js/__dirname "/script/watch.clj"))
 (def file-repl (str js/__dirname "/script/repl.clj"))
-
-(defn file-cljs-jar [version] (str js/__dirname "/cljs-" version ".jar"))
-(defn url-cljs-jar [version] (str "https://github.com/clojure/clojurescript/releases/download/r" version "/cljs.jar"))
 
 ;;---------------------------------------------------------------------------
 ;; Misc
@@ -57,14 +58,6 @@
   (or (io/slurp-edn file-config-edn)
       (exit-error "No config found. Please create one in" file-config-edn)))
 
-(defn ensure-cljs-version! []
-  (let [version (:cljs-version config)
-        jar-path (file-cljs-jar version)
-        jar-url (url-cljs-jar version)]
-    (or (io/path-exists? jar-path)
-        (do (println "Downloading ClojureScript version" version)
-            (io/download jar-url jar-path)))))
-
 (defn ensure-cmd! [id]
   (or (get-in config [:scripts (keyword id)])
       (exit-error (str "Unrecognized command: '" id "' is not found in :scripts map"))))
@@ -75,9 +68,14 @@
 
 (declare task-install)
 
+(defn get-current-deps []
+  (let [user-deps (select-keys config dep-keys)
+        all-deps (merge-with concat (base-deps) user-deps)]
+    all-deps))
+
 (defn ensure-dependencies! []
   (let [cache (io/slurp-edn file-deps-cache)
-        stale? (not= (select-keys config dep-keys)
+        stale? (not= (get-current-deps)
                      (select-keys cache dep-keys))]
     (if stale?
       (task-install)
@@ -89,7 +87,7 @@
 
 (defn task-install []
   (ensure-java!)
-  (let [deps (apply concat (map config dep-keys))
+  (let [deps (apply concat (map (get-current-deps) dep-keys))
         result (spawn-sync "java"
                  #js["-jar" file-dep-retriever (pr-str deps)]
                  #js{:stdio #js["pipe" "pipe" 2]})
@@ -107,8 +105,7 @@
 (defn build-classpath [src]
   (let [{:keys [jars]} (ensure-dependencies!)
         source-paths (when src (if (sequential? src) src [src]))
-        cljs-jar (file-cljs-jar (:cljs-version config))
-        all (concat [cljs-jar] jars source-paths)
+        all (concat jars source-paths)
         sep (if windows? ";" ":")]
     (string/join sep all)))
 
@@ -157,7 +154,6 @@
 (defn -main [task & args]
   (print-welcome)
   (set! config (ensure-config!))
-  (ensure-cljs-version!)
   (cond
     (= task "install") (task-install)
     (= task "build") (task-script (first args) file-build)
