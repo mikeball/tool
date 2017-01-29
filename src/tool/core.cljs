@@ -29,6 +29,15 @@
 (def file-repl (str js/__dirname "/script/repl.clj"))
 
 ;;---------------------------------------------------------------------------
+;; Lumo
+;;---------------------------------------------------------------------------
+
+(def npmRun (js/require "npm-run"))
+(defn run-lumo
+  ([] (npmRun.spawnSync "lumo" #js{:stdio "inherit"}))
+  ([filename] (npmRun.spawnSync "lumo" #js[filename] #js{:stdio "inherit"})))
+
+;;---------------------------------------------------------------------------
 ;; Misc
 ;;---------------------------------------------------------------------------
 
@@ -152,14 +161,19 @@
   (println))
 
 (defn -main [task & args]
-  (print-welcome)
-  (set! config (ensure-config!))
   (cond
-    (= task "install") (task-install)
-    (= task "build") (task-script (first args) file-build)
-    (= task "watch") (task-script (first args) file-watch)
-    (= task "repl") (task-repl (first args))
-    :else (task-custom-script task args)))
+    (nil? task) (do (print-welcome) (run-lumo))
+    (string/ends-with? task ".cljs") (run-lumo task)
+    :else
+    (do
+      (print-welcome)
+      (set! config (ensure-config!))
+      (cond
+        (= task "install") (task-install)
+        (= task "build") (task-script (first args) file-build)
+        (= task "watch") (task-script (first args) file-watch)
+        (= task "repl") (task-repl (first args))
+        :else (task-custom-script task args)))))
 
 (set! *main-cli-fn* -main)
 (enable-console-print!)
