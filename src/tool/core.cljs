@@ -45,8 +45,6 @@
 
 (def child-process (js/require "child_process"))
 (def spawn-sync (.-spawnSync child-process))
-(def exec-sync (.-execSync child-process))
-(def argsplit (js/require "argsplit"))
 
 (defn exit-error [& args]
   (apply js/console.error args)
