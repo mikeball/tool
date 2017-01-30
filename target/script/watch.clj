@@ -4,9 +4,7 @@
          '[figwheel-sidecar.build-middleware.notifications :refer [warning-message-handler]]
          '[strictly-specking-standalone.ansi-util :refer [with-color]])
 
-(def build (edn/read-string (first *command-line-args*)))
-
-(let [{:keys [src compiler]} build]
+(let [{:keys [src compiler]} *build-config*]
   (with-color
     (binding [cljs.analyzer/*cljs-warning-handlers* [(warning-message-handler identity)]]
       (b/watch src
