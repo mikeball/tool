@@ -28,12 +28,25 @@
   [[:compiler :optimizations]
    [:compiler :target]])
 
+;;---------------------------------------------------------------------------
+;; JARs used for compiling w/ JVM
+;; (they are AOT'd to reduce load time)
+;;---------------------------------------------------------------------------
 
+;; ClojureScript downloaded based on version in config
 (defn file-cljs-jar [version] (str js/__dirname "/cljs-" version ".jar"))
 (defn url-cljs-jar [version] (str "https://github.com/clojure/clojurescript/releases/download/r" version "/cljs.jar"))
 
+;; We build/host our own AOT'd uberjar for figwheel sidecar
+;; (FIXME: find a better way to host this, though changes may be infrequent
+;;  since we are only using it for pretty errors/warnings, or move it to own
+;;  error/warning prettier repo)
 (defn file-fig-jar [version] (str js/__dirname "/figwheel-sidecar-" version ".jar"))
 (def fig-version "0.5.8")
+
+(defn get-jvm-jars []
+  [(file-cljs-jar (:cljs-version config))
+   (file-fig-jar fig-version)])
 
 ;;---------------------------------------------------------------------------
 ;; Misc
@@ -106,12 +119,10 @@
         (io/spit file-deps-cache (with-out-str (pprint cache)))
         cache))))
 
-(defn build-classpath [& {:keys [src with-base-jars]}]
+(defn build-classpath [& {:keys [src jvm?]}]
   (let [{:keys [jars]} (ensure-dependencies!)
         source-paths (when src (if (sequential? src) src [src]))
-        cljs-jar (file-cljs-jar (:cljs-version config))
-        fig-jar (file-fig-jar fig-version)
-        jars (cond->> jars with-base-jars (concat [cljs-jar fig-jar]))
+        jars (cond->> jars jvm? (concat (get-jvm-jars)))
         all (concat jars source-paths)
         sep (if windows? ";" ":")]
     (string/join sep all)))
@@ -119,7 +130,7 @@
 (defn task-script [id file-script]
   (ensure-java!)
   (let [{:keys [src] :as build} (ensure-build! id)
-        cp (build-classpath :src src :with-base-jars true)]
+        cp (build-classpath :src src :jvm? true)]
     (spawn-sync "java"
       #js["-cp" cp "clojure.main" file-script (pr-str build)]
       #js{:stdio "inherit"})))
@@ -133,14 +144,14 @@
 
 (defn task-repl [id]
   (ensure-java!)
-  (let [cp (build-classpath :src (all-sources) :with-base-jars true)]
+  (let [cp (build-classpath :src (all-sources) :jvm? true)]
     (spawn-sync "java"
       #js["-cp" cp "clojure.main" file-repl]
       #js{:stdio "inherit"})))
 
 (defn task-custom-script [path user-args]
   (ensure-java!)
-  (let [cp (build-classpath :src (all-sources) :with-base-jars true)
+  (let [cp (build-classpath :src (all-sources) :jvm? true)
         onload (str "(do (def ^:dynamic *cljs-config* (quote " config ")) nil)")
         args (concat ["-cp" cp "clojure.main" "-e" onload path] user-args)]
     (spawn-sync "java" (clj->js args) #js{:stdio "inherit"})))
