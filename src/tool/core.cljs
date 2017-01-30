@@ -31,15 +31,6 @@
 (def fig-version "0.5.8")
 
 ;;---------------------------------------------------------------------------
-;; Lumo
-;;---------------------------------------------------------------------------
-
-(def npmRun (js/require "npm-run"))
-(defn run-lumo
-  ([] (npmRun.spawnSync "lumo" #js{:stdio "inherit"}))
-  ([filename args] (npmRun.spawnSync "lumo" (apply array (cons filename args)) #js{:stdio "inherit"})))
-
-;;---------------------------------------------------------------------------
 ;; Misc
 ;;---------------------------------------------------------------------------
 
@@ -72,7 +63,7 @@
             (io/download jar-url jar-path)))))
 
 (defn ensure-config! []
-  (or (io/slurp-edn file-config-edn)
+  (or config
       (exit-error "No config found. Please create one in" file-config-edn)))
 
 (defn ensure-build! [id]
@@ -110,7 +101,7 @@
         (io/spit file-deps-cache (with-out-str (pprint cache)))
         cache))))
 
-(defn build-classpath [src & {:keys [with-base-jars]}]
+(defn build-classpath [& {:keys [src with-base-jars]}]
   (let [{:keys [jars]} (ensure-dependencies!)
         source-paths (when src (if (sequential? src) src [src]))
         cljs-jar (file-cljs-jar (:cljs-version config))
@@ -122,8 +113,8 @@
 
 (defn task-script [id file-script]
   (ensure-java!)
-  (let [build (ensure-build! id)
-        cp (build-classpath (:src build) :with-base-jars true)]
+  (let [{:keys [src] :as build} (ensure-build! id)
+        cp (build-classpath :src src :with-base-jars true)]
     (spawn-sync "java"
       #js["-cp" cp "clojure.main" file-script (pr-str build)]
       #js{:stdio "inherit"})))
@@ -137,17 +128,36 @@
 
 (defn task-repl [id]
   (ensure-java!)
-  (let [cp (build-classpath (all-sources) :with-base-jars true)]
+  (let [cp (build-classpath :src (all-sources) :with-base-jars true)]
     (spawn-sync "java"
       #js["-cp" cp "clojure.main" file-repl]
       #js{:stdio "inherit"})))
 
 (defn task-custom-script [path user-args]
   (ensure-java!)
-  (let [cp (build-classpath (all-sources) :with-base-jars true)
+  (let [cp (build-classpath :src (all-sources) :with-base-jars true)
         onload (str "(do (def ^:dynamic *cljs-config* (quote " config ")) nil)")
         args (concat ["-cp" cp "clojure.main" "-e" onload path] user-args)]
     (spawn-sync "java" (clj->js args) #js{:stdio "inherit"})))
+
+;;---------------------------------------------------------------------------
+;; Lumo
+;;---------------------------------------------------------------------------
+
+(defn build-lumo-args [args]
+  (apply array
+    (concat args
+      ;; Add dependencies to classpath, and all source directories
+      (when config
+        ["-c" (build-classpath :src (all-sources))]))))
+
+(def npmRun (js/require "npm-run"))
+(defn run-lumo [args]
+  (npmRun.spawnSync "lumo" (build-lumo-args args) #js{:stdio "inherit"}))
+
+;;---------------------------------------------------------------------------
+;; Entry
+;;---------------------------------------------------------------------------
 
 (defn print-welcome []
   (println)
@@ -156,13 +166,16 @@
   (println))
 
 (defn -main [task & args]
+  (when (io/path-exists? file-config-edn)
+    (set! config (io/slurp-edn file-config-edn)))
+
   (cond
-    (nil? task) (do (print-welcome) (run-lumo))
-    (string/ends-with? task ".cljs") (run-lumo task args)
+    (nil? task) (do (print-welcome) (run-lumo nil))
+    (string/ends-with? task ".cljs") (run-lumo (cons task args))
     :else
     (do
       (print-welcome)
-      (set! config (ensure-config!))
+      (ensure-config!)
       (ensure-cljs-version!)
       (cond
         (= task "install") (task-install)
