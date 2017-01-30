@@ -4,8 +4,20 @@
     [cljs.pprint :refer [pprint]]
     [tool.io :as io]))
 
+;; filenames
+(def file-config-edn "cljs.edn")
+(def file-deps-cache ".deps-cache.edn")
+(def file-dep-retriever (str js/__dirname "/cdr.jar"))
+(def file-build (str js/__dirname "/script/build.clj"))
+(def file-watch (str js/__dirname "/script/watch.clj"))
+(def file-repl (str js/__dirname "/script/repl.clj"))
+
 ;; config data
 (def config nil)
+(defn load-config! []
+  (when (io/path-exists? file-config-edn)
+    (set! config (io/slurp-edn file-config-edn))))
+
 (def deps-cache nil)
 
 (def dep-keys
@@ -16,13 +28,6 @@
   [[:compiler :optimizations]
    [:compiler :target]])
 
-;; filenames
-(def file-config-edn "cljs.edn")
-(def file-deps-cache ".deps-cache.edn")
-(def file-dep-retriever (str js/__dirname "/cdr.jar"))
-(def file-build (str js/__dirname "/script/build.clj"))
-(def file-watch (str js/__dirname "/script/watch.clj"))
-(def file-repl (str js/__dirname "/script/repl.clj"))
 
 (defn file-cljs-jar [version] (str js/__dirname "/cljs-" version ".jar"))
 (defn url-cljs-jar [version] (str "https://github.com/clojure/clojurescript/releases/download/r" version "/cljs.jar"))
@@ -166,9 +171,7 @@
   (println))
 
 (defn -main [task & args]
-  (when (io/path-exists? file-config-edn)
-    (set! config (io/slurp-edn file-config-edn)))
-
+  (load-config!)
   (cond
     (nil? task) (do (print-welcome) (run-lumo nil))
     (string/ends-with? task ".cljs") (run-lumo (cons task args))
