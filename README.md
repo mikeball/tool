@@ -17,9 +17,18 @@ npm install cljs/tool -g
 
 Users will not be asked to install Java until required.
 
-## Run
+## Cljs
 
-The command name is `cljs`, the abbreviation for ClojureScript.
+There should be nothing special about the tool name.
+`cljs` is the abbreviation for ClojureScript, and the most unsurprising
+name choice for a first run ClojureScript tool.
+
+## Run in terminal
+
+Fast experimenting should be the default.  We use
+[Lumo] to allow you to try the most basic things as fast as possible.
+
+Try commands in a REPL:
 
 ```
 $ cljs
@@ -28,7 +37,7 @@ cljs.user=> (+ 1 2 3)
 10
 ```
 
-Or run a script:
+Run commands in a script:
 
 ```clojure
 ;; in my_file.cljs
@@ -40,11 +49,7 @@ $ cljs my_file.cljs
 10
 ```
 
-Fast experimenting should be the default. Thus, the previous examples work by
-using [Lumo], a pure Node environment for running ClojureScript.
-It allows quick tinkerers to try the most basic things as fast as possible.
-
-## Dependencies
+## Get dependencies
 
 You can pull in external libraries by specifying them in a plain config file, `cljs.edn`:
 
@@ -53,6 +58,7 @@ You can pull in external libraries by specifying them in a plain config file, `c
 ```
 
 ```
+$ cljs install
 $ cljs
 
 cljs.user=> (require '[markdown.core :refer [md->html]])
@@ -60,18 +66,10 @@ cljs.user=> (md->html "## Hello World")
 "<h2>Hello World</h2>"
 ```
 
-Dependencies are resolved and installed automatically when running any `cljs`
-command, or manually with:
+## Organize Source
 
-```
-$ cljs install
-```
-
-## Organizing Source
-
-Source files should be able to refer to each other, and likewise you should be
-able to use them at the REPL.
-This is best done by creating a build name that points to a source directory.
+If you create a build name that points to a source directory, you can
+start organizing files into canonical namespaces.
 
 ```edn
 {:dependencies [...]
@@ -80,18 +78,27 @@ This is best done by creating a build name that points to a source directory.
                                ;;     (:main can be any name for the build)
 ```
 
-If you have a `src/example/core.cljs` with a `foo` function, you can
-run it with this and do likewise in other files:
+With this config, say you have a `src/example/core.cljs`:
+
+```clojure
+(ns example.core)
+
+(defn hello []
+  (println "Hello World"))
+```
+
+You can do the following:
 
 ```sh
 $ cljs
 
 cljs.user=> (require 'example.core)
 cljs.user=> (in-ns 'example.core)
-example.core=> (foo)
+example.core=> (hello)
+Hello World
 ```
 
-## Compiling to JavaScript
+## Compile to JavaScript
 
 To run your ClojureScript code without the `cljs` command, you can
 compile it to a JavaScript output file for use in a browser or elsewhere.
@@ -104,17 +111,20 @@ Specify extra config for compiler:
                  :compiler {:output-to "main.js"}}}} ;; <-- compiler options
 ```
 
-You can build once or continue rebuilding after changes:
+You can build once or continue rebuilding after changes.  This is not done by
+Lumo, but uses the fastest ClojureScript compiler (optimized for the JVM),
+with better default errors and warnings provided by Figwheel.
 
 ```sh
 $ cljs build main
 $ cljs watch main
 ```
 
-## Figwheel
+## Develop for the web
 
-[Figwheel] allows you to compile your project using a much
-more fluid and interactive developer experience:
+When developing for the web, you can take full advantage of [Figwheel].
+It allows you to compile your project using a much more fluid and interactive
+developer experience (e.g. browser-connected console, hotloading, in-page status):
 
 ```sh
 $ cljs figwheel main
@@ -131,23 +141,29 @@ Provide optional keys for more configuration:
                  :compiler {...}}}}
 ```
 
-## Manual build script
+__Try it yourself:__ In this repo, run the following and open `public/index.html`.
+
+```sh
+$ cljs figwheel example
+```
+
+## Customize build scripts
 
 For direct access to the ClojureScript compiler API,
-run with a `*.clj` file (not `*.cljs`).
+run with a Clojure file (`.clj` not `.cljs`):
 
 ```
-$ cljs my_build_script.clj
+$ cljs build.clj
 ```
 
-Your Clojure program will be run with access to the compiler API,
-receiving config in a `*cljs-config*` var.
+Your Clojure program will be given access to the compiler API and
+your config in a `*cljs-config*` var.
 
 ```clojure
-;; my_build_script.clj
-(require '[cljs.build.api :as b])
+;; build.clj
+(require '[cljs.build.api :as b]) ;; <-- official cljs compiler api
 
-(let [{:keys [src compiler]} *build-config*]
+(let [{:keys [src compiler]} (-> *cljs-config* :builds :main)]
   (b/build src compiler))
 ```
 
