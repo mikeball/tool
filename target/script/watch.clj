@@ -1,5 +1,4 @@
 (require '[cljs.build.api :as b]
-         '[clojure.edn :as edn]
          '[figwheel-sidecar.cljs-utils.exception-parsing :refer [print-exception]]
          '[figwheel-sidecar.build-middleware.notifications :refer [warning-message-handler]]
          '[strictly-specking-standalone.ansi-util :refer [with-color]])
