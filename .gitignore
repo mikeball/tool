@@ -4,3 +4,6 @@
 /.cljs_node_repl
 /target/cljs-*.jar
 *.swp
+
+/public/out
+/public/main.js

@@ -1,5 +1,17 @@
 {:cljs-version "1.9.456"
- :builds {:tool {:src "src"
-                 :compiler {:target :nodejs
-                            :optimizations :simple
-                            :output-to "target/tool.js"}}}}
+ :builds
+ {:tool
+  {:src "src"
+   :compiler {:target :nodejs
+              :optimizations :simple
+              :output-to "target/tool.js"}}
+
+  :example
+  {:src "src-example"
+   :compiler {:main "example.core"
+              :output-to "public/main.js"
+              :output-dir "public/out"
+              :asset-path "out"}}}
+
+ :figwheel
+ {:css-dirs ["public/css"]}}

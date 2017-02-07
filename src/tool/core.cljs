@@ -11,6 +11,7 @@
 (def file-build-script (str js/__dirname "/script/build.clj"))
 (def file-watch-script (str js/__dirname "/script/watch.clj"))
 (def file-repl-script (str js/__dirname "/script/repl.clj"))
+(def file-figwheel-script (str js/__dirname "/script/figwheel.clj"))
 
 ;; User Config
 (def config nil)
@@ -162,7 +163,8 @@
      - *command-line-args* (as usual)"
   [& {:keys [build-id script-path args]}]
   (ensure-java!)
-  (let [build (when build-id (ensure-build! build-id))
+  (let [build (when build-id (-> (ensure-build! build-id)
+                                 (assoc :id build-id)))
         src (or (:src build) (all-sources))
         cp (build-classpath :src src :jvm? true)
         onload (str
@@ -227,6 +229,7 @@
         (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
         (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
         (= task "repl") (run-api-script :script-path file-repl-script)
+        (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
         (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
         :else (exit-error "Unrecognized task:" task)))))
 
