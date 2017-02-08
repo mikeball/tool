@@ -7,31 +7,39 @@ A tool to answer the following questions:
 - What would a great first run of ClojureScript look like?
 - How do we create that in the clearest and cheapest way possible?
 - Should it do everything?
-- Can it improve adoption without fragmenting the community?
 
 ## Install
 
 ```
-npm install cljs/tool -g
+$ npm install cljs/tool -g
 ```
 
 Users will not be asked to install Java until required.
 
-## Cljs
+## Basics
 
-There should be nothing special about the tool name.
-`cljs` is the abbreviation for ClojureScript, and the most unsurprising
+`cljs` is the abbreviation for ClojureScript, and an unsurprising
 name choice for a first run ClojureScript tool.
 
-## Run in terminal
+ <table>
+<tr>
+<td valign=top>
+__Logo & Greeting__
+</td>
+<td>
+<img src="img/cljs-starting.png" width="700">
+</td>
+</tr>
+</table>
 
-Fast experimenting should be the default.  We use
-[Lumo] to allow you to try the most basic things as fast as possible.
+--
+
+Using __[Lumo]__, fast experimenting is the default experience.  Try the most basic things as fast as possible.
 
  <table>
 <tr>
 <td valign="top">
-__Try REPL__
+__Try REPL__<br>_by Lumo_
 </td>
 <td>
 ```
@@ -44,7 +52,7 @@ cljs.user=> (+ 1 2 3)
 </tr>
 <tr>
 <td valign="top">
-__Try Script__
+__Try Script__<br>_by Lumo_
 </td>
 <td>
 ```clojure
@@ -146,7 +154,7 @@ __Use namespaces__
 ```
 </td>
 <td>
-```sh
+```clojure
 $ cljs
 
 cljs.user=> (require 'example.core)
@@ -190,16 +198,24 @@ $ cljs watch main
 ```
 </td>
 </tr>
+<tr>
+<td valign=top>
+__Pretty errors__<br>_by [Figwheel Sidecar]_
+</td>
+<td>
+<img src="img/cljs-error.png" width="650">
+</td>
+</tr>
 </table>
 
 Rather than using Lumo, we use the fast ClojureScript compiler optimized for the JVM,
-with better default errors and warnings provided by Figwheel.
+with better default errors and warnings provided by [Figwheel Sidecar].
 
 ## Develop for the web
 
-When developing for the web, you can take full advantage of [Figwheel].
-It allows you to compile your project using a much more fluid and interactive
-developer experience (e.g. browser-connected console, hotloading, in-page status):
+Using __[Figwheel]__, you can compile your project with a much more fluid and interactive
+developer experience. You get a browser-connected REPL, hot-loading of files
+as they change, and an in-page status display.
 
  <table>
 <tr>
@@ -228,17 +244,29 @@ $ cljs figwheel main
 ```
 </td>
 </tr>
-<tr>
-<td valign=top>
-_Try in this repo_
-</td>
-<td>
+</table>
+
+--
+
+__Try the example__ provided in this repo:
+
+ <table>
+<tr><td>
+
 ```sh
 $ cljs figwheel example
+
+cljs.user=>
 ```
-</td>
-</tr>
-</table>
+
+Open `public/index.html`, then modify `src-example/example/core.cljs` to see
+status messages on your page:
+
+<img src="img/figwheel-success.png" width=32%>
+<img src="img/figwheel-error.png" width=32%>
+<img src="img/figwheel-warning.png" width=32%>
+
+</td></tr></table>
 
 
 ## Customize build scripts
@@ -276,5 +304,6 @@ $ cljs build.clj
 </table>
 
 [Lumo]:https://github.com/anmonteiro/lumo
+[Figwheel Sidecar]:https://github.com/bhauman/lein-figwheel/tree/master/sidecar
 [Figwheel]:https://github.com/bhauman/lein-figwheel
 [Quick Start]:https://clojurescript.org/guides/quick-start
