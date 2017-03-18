@@ -14,159 +14,107 @@ A tool to answer the following questions:
 $ npm install cljs/tool -g
 ```
 
+This installs a `cljs` command, which is the abbreviation for ClojureScript.
+
 Users will not be asked to install Java until required.
 
 ## Basics
 
-`cljs` is the abbreviation for ClojureScript, and an unsurprising
-name choice for a first run ClojureScript tool.
+Using __[Lumo]__, fast experimenting is the default experience.
+Try the most basic things as fast as possible.
 
- <table>
-<tr>
-<td valign=top>
-__Logo & Greeting__
-</td>
-<td>
-<img src="img/cljs-starting.png" width="700">
-</td>
-</tr>
-</table>
+- REPL
 
---
+  ```
+  $ cljs
 
-Using __[Lumo]__, fast experimenting is the default experience.  Try the most basic things as fast as possible.
+  cljs.user=> (+ 1 2 3)
+  10
+  ```
 
- <table>
-<tr>
-<td valign="top">
-__Try REPL__<br>_by Lumo_
-</td>
-<td>
-```
-$ cljs
+- Run script
 
-cljs.user=> (+ 1 2 3)
-10
-```
-</td>
-</tr>
-<tr>
-<td valign="top">
-__Try Script__<br>_by Lumo_
-</td>
-<td>
-```clojure
-;; my_file.cljs
-(println (+ 1 2 3))
-```
-</td>
-<td>
-```sh
-$ cljs my_file.cljs
-10
-```
-</td>
-</tr>
-</table>
+  ```clojure
+  ;; my_file.cljs
+  (println (+ 1 2 3))
+  ```
+
+  ```sh
+  $ cljs my_file.cljs
+  10
+  ```
 
 ## Use dependencies
 
-You can pull in external libraries by specifying them in a plain config file, `cljs.edn`:
+You can pull in external libraries by specifying them in a plain config file, `cljs.edn`.
+Dependencies are automatically downloaded when running any `cljs` command or explicitly
+with `cljs install`.
 
- <table>
-<tr>
-<td valign="top">
-__Try Deps__
-</td>
-<td valign=top>
-```edn
-;; cljs.edn
-{:dependencies
- [[markdown-clj "0.9.94"]]}
-```
+- Dependencies
 
-```
-$ cljs install
-```
-</td>
-<td valign=top>
-```clojure
-$ cljs
+  ```edn
+  ;; cljs.edn
+  {:dependencies
+   [[markdown-clj "0.9.94"]]}
+  ```
 
-cljs.user=> (require '[markdown.core :refer [md->html]])
-cljs.user=> (md->html "## Hello World")
-"<h2>Hello World</h2>"
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__In Script__
-</td>
-<td valign=top>
-```html
-# FIXME: Hmm, this doesn't work...
+  ```clojure
+  $ cljs
 
-$ cljs my_file.cljs
-<h2>Hello World</h2>
-```
-</td>
-<td>
-```clojure
-;; my_file.cljs
-(require '[markdown.core :refer [md->html]])
+  cljs.user=> (require '[markdown.core :refer [md->html]])
+  cljs.user=> (md->html "## Hello World")
+  "<h2>Hello World</h2>"
+  ```
 
-(println (md->html "## Hello World"))
-```
-</td>
-</tr>
-</table>
+- In Script
 
-## Organize Source
+  ```clojure
+  ;; my_file.cljs
+  (require '[markdown.core :refer [md->html]])
+
+  (println (md->html "## Hello World"))
+  ```
+
+  ```html
+  # FIXME: Hmm, this doesn't work...
+
+  $ cljs my_file.cljs
+  <h2>Hello World</h2>
+  ```
+
+## Use Namespaces
 
 If you create a build name that points to a source directory, you can
 start organizing files into canonical namespaces.
 
- <table>
-<tr>
-<td valign=top>
-__Specify src directory__
-</td>
-<td colspan=2>
-```edn
-;; cljs.edn
-{:dependencies [...]
- :builds {:main {:src "src"}}} ;; <-- Source at "src" directory,
-                               ;;     or use ["src" ...] for multiple.
-                               ;;     (:main can be any name for the build)
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__Use namespaces__
-</td>
-<td valign=top>
-```clojure
-;; src/example/core.cljs
-(ns example.core)
+- Specify src directory
 
-(defn hello []
-  (println "Hello World"))
-```
-</td>
-<td>
-```clojure
-$ cljs
+  ```edn
+  ;; cljs.edn
+  {:dependencies [...]
+   :builds {:main {:src "src"}}} ;; <-- Source at "src" directory,
+                                 ;;     or use ["src" ...] for multiple.
+                                 ;;     (:main can be any name for the build)
+  ```
 
-cljs.user=> (require 'example.core)
-cljs.user=> (in-ns 'example.core)
-example.core=> (hello)
-Hello World
-```
-</td>
-</tr>
-</table>
+- Use namespaces
+
+  ```clojure
+  ;; src/example/core.cljs
+  (ns example.core)
+
+  (defn hello []
+    (println "Hello World"))
+  ```
+
+  ```clojure
+  $ cljs
+
+  cljs.user=> (require 'example.core)
+  cljs.user=> (in-ns 'example.core)
+  example.core=> (hello)
+  Hello World
+  ```
 
 ## Compile to JavaScript
 
@@ -174,41 +122,26 @@ To run your ClojureScript code without the `cljs` command, you can
 compile it to a JavaScript output file for use in a browser or elsewhere.
 Specify extra config for compiler:
 
- <table>
-<tr>
-<td valign=top>
-__Compiler config__
-</td>
-<td>
-```edn
-;; cljs.edn
-{:cljs-version "1.9.456"  ;; <-- compiler version
- :dependencies [...]
- :builds {:main {:src "src"
-                 :compiler {:output-to "main.js"}}}} ;; <-- compiler options
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__Build or watch__
-</td>
-<td valign=top>
-```sh
-$ cljs build main
-$ cljs watch main
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__Pretty errors__<br>_by [Figwheel Sidecar]_
-</td>
-<td>
-<img src="img/cljs-error.png" width="650">
-</td>
-</tr>
-</table>
+- Compiler config
+
+  ```edn
+  ;; cljs.edn
+  {:cljs-version "1.9.456"  ;; <-- compiler version
+   :dependencies [...]
+   :builds {:main {:src "src"
+                   :compiler {:output-to "main.js"}}}} ;; <-- compiler options
+  ```
+
+- Build or watch
+
+  ```sh
+  $ cljs build main
+  $ cljs watch main
+  ```
+
+- Pretty errors _by [Figwheel Sidecar]_
+
+  <img src="img/cljs-error.png" width="650">
 
 Rather than using Lumo, we use the fast ClojureScript compiler optimized for the JVM,
 with better default errors and warnings provided by [Figwheel Sidecar].
@@ -219,57 +152,36 @@ Using __[Figwheel]__, you can compile your project with a much more fluid and in
 developer experience. You get a browser-connected REPL, hot-loading of files
 as they change, and an in-page status display.
 
- <table>
-<tr>
-<td valign=top>
-__Figwheel config__
-</td>
-<td>
-```edn
-;; cljs.edn
-{:cljs-version "1.9.456"
- :dependencies [...]
- :figwheel {...} ;; <-- optional server-level config
- :builds {:main {:src "src"
-                 :figwheel ... ;; <-- optional build-level config
-                 :compiler {...}}}}
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__Run Figwheel__
-</td>
-<td>
-```sh
-$ cljs figwheel main
-```
-</td>
-</tr>
-</table>
+- Figwheel config
 
---
+  ```edn
+  ;; cljs.edn
+  {:cljs-version "1.9.456"
+   :dependencies [...]
+   :figwheel {...} ;; <-- optional server-level config
+   :builds {:main {:src "src"
+                   :figwheel ... ;; <-- optional build-level config
+                   :compiler {...}}}}
+  ```
 
-__Try the example__ provided in this repo:
+- Run Figwheel
 
- <table>
-<tr><td>
+  ```sh
+  $ cljs figwheel main
+  ```
 
-```sh
-$ cljs figwheel example
-
-cljs.user=>
-```
-
-Open `public/index.html`, then modify `src-example/example/core.cljs` to see
-status messages on your page:
-
-<img src="img/figwheel-success.png" width=32%>
-<img src="img/figwheel-error.png" width=32%>
-<img src="img/figwheel-warning.png" width=32%>
-
-</td></tr></table>
-
+> Try the example provided in this repo:
+>
+> ```sh
+> $ cljs figwheel example
+>
+> cljs.user=>
+> ```
+>
+> Open `public/index.html`, then modify `src-example/example/core.cljs` to see
+> status messages on your page:
+>
+> <img src="img/figwheel-success.png" width=32%> <img src="img/figwheel-error.png" width=32%> <img src="img/figwheel-warning.png" width=32%>
 
 ## Customize build scripts
 
@@ -278,32 +190,21 @@ run with a Clojure file (`.clj` not `.cljs`).
 Your Clojure program will be given access to the compiler API and
 your config in a `*cljs-config*` var.
 
- <table>
-<tr>
-<td valign=top>
-__Custom Build__
-</td>
-<td>
-```clojure
-;; build.clj
-(require '[cljs.build.api :as b]) ;; <-- official cljs compiler api
+- Custom Build
 
-(let [{:keys [src compiler]} (-> *cljs-config* :builds :main)]
-  (b/build src compiler))
-```
-</td>
-</tr>
-<tr>
-<td valign=top>
-__Run__
-</td>
-<td>
-```
-$ cljs build.clj
-```
-</td>
-</tr>
-</table>
+  ```clojure
+  ;; build.clj
+  (require '[cljs.build.api :as b]) ;; <-- official cljs compiler api
+
+  (let [{:keys [src compiler]} (-> *cljs-config* :builds :main)]
+    (b/build src compiler))
+  ```
+
+- Run
+
+  ```
+  $ cljs build.clj
+  ```
 
 [Lumo]:https://github.com/anmonteiro/lumo
 [Figwheel Sidecar]:https://github.com/bhauman/lein-figwheel/tree/master/sidecar
