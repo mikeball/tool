@@ -29,7 +29,7 @@ Try the most basic things as fast as possible.
   $ cljs
 
   cljs.user=> (+ 1 2 3)
-  10
+  6
   ```
 
 - Run script
@@ -41,7 +41,7 @@ Try the most basic things as fast as possible.
 
   ```sh
   $ cljs my_file.cljs
-  10
+  6
   ```
 
 ## Use dependencies
