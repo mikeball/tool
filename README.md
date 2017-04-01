@@ -76,8 +76,6 @@ with `cljs install`.
   ```
 
   ```html
-  # FIXME: Hmm, this doesn't work...
-
   $ cljs my_file.cljs
   <h2>Hello World</h2>
   ```

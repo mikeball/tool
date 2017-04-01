@@ -183,16 +183,18 @@
   "We add args when calling lumo in order to integrate config file settings."
   [args]
   (apply array
-    (concat args
+    (concat
       ;; Add dependencies to classpath, and all source directories
       (when config
-        ["-c" (build-classpath :src (all-sources))]))))
+        ["-c" (build-classpath :src (all-sources))])
+      args)))
 
 (defn run-lumo
   "Lumo is an executable published on npm for running a REPL or a file."
   [args]
-  (let [npmRun (js/require "npm-run")]
-    (npmRun.spawnSync "lumo" (build-lumo-args args) #js{:stdio "inherit"})))
+  (let [npmRun (js/require "npm-run")
+        lumo-args (build-lumo-args args)]
+    (npmRun.spawnSync "lumo" lumo-args #js{:stdio "inherit"})))
 
 ;;---------------------------------------------------------------------------
 ;; Entry
