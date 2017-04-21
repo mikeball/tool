@@ -13,15 +13,28 @@
 (def file-repl-script (str js/__dirname "/script/repl.clj"))
 (def file-figwheel-script (str js/__dirname "/script/figwheel.clj"))
 
+;;---------------------------------------------------------------------------
 ;; User Config
+;;---------------------------------------------------------------------------
+
 (def config nil)
+
+(defn transform-builds
+  "Add :id to each build"
+  [builds]
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (assoc v :id k)))
+    {} builds))
+
+(defn transform-config
+  [cfg]
+  (cond-> cfg
+    (:builds cfg) (update :builds transform-builds)))
+
 (defn load-config! []
   (when (io/path-exists? file-config-edn)
-    (set! config (io/slurp-edn file-config-edn))))
-
-(def dep-keys
-  "Dependencies are found in these config keys"
-  [:dependencies :dev-dependencies])
+    (set! config (transform-config (io/slurp-edn file-config-edn)))))
 
 ;;---------------------------------------------------------------------------
 ;; Java
@@ -83,13 +96,31 @@
   (or config
       (exit-error "No config found. Please create one in" file-config-edn)))
 
+(defn ensure-build-map! []
+  (when-not (seq (:builds config))
+    (exit-error "No builds were found in the :builds map!")))
+
+(defn ensure-build-imply! [id]
+  (let [[build & others] (vals (:builds config))]
+    (when (nil? id)
+      (if others
+        (exit-error (str "Please specify a build " (keys (:builds config)) " since there are more than one."))
+        build))))
+
 (defn ensure-build!
   "Emit error if the given build does not exist in config :builds."
   [id]
-  (or (get-in config [:builds (keyword id)])
-      (exit-error (str "Unrecognized build: '" id "' is not found in :builds map"))))
+  (or
+    (ensure-build-map!)
+    (ensure-build-imply! id)
+    (get-in config [:builds (keyword id)])
+    (exit-error (str "Unrecognized build: '" id "' is not found in :builds map"))))
 
 (declare install-deps)
+
+(def dep-keys
+  "Dependencies are found in these config keys"
+  [:dependencies :dev-dependencies])
 
 (defn ensure-deps!
   "If dependencies have changed since last run, resolve and download them."
@@ -157,8 +188,7 @@
      - *build-config*      (specific build config, if specified)
      - *command-line-args* (as usual)"
   [& {:keys [build-id script-path args]}]
-  (let [build (when build-id (-> (ensure-build! build-id)
-                                 (assoc :id build-id)))
+  (let [build (ensure-build! build-id)
         src (or (:src build) (all-sources))
         cp (build-classpath :src src :jvm? true)
         onload (str
