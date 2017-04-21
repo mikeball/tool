@@ -3,7 +3,7 @@
          '[figwheel-sidecar.build-middleware.notifications :refer [warning-message-handler]]
          '[strictly-specking-standalone.ansi-util :refer [with-color]])
 
-(println "Building ...")
+(println "Building" (:id *build-config*) "...")
 
 (let [start (System/nanoTime)
       {:keys [src compiler]} *build-config*
