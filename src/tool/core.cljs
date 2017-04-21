@@ -24,6 +24,13 @@
   [:dependencies :dev-dependencies])
 
 ;;---------------------------------------------------------------------------
+;; Java
+;;---------------------------------------------------------------------------
+
+(def jre (js/require "node-jre"))
+(def java-path (jre.driver))
+
+;;---------------------------------------------------------------------------
 ;; JARs used for compiling w/ JVM
 ;; (they are AOT'd to reduce load time)
 ;;---------------------------------------------------------------------------
@@ -59,17 +66,6 @@
 ;;---------------------------------------------------------------------------
 ;; Emit errors or perform corrective actions if requirements not met
 ;;---------------------------------------------------------------------------
-
-(defn java-installed?
-  "Determine if the java runtime environment is available."
-  []
-  (not (.-error (spawn-sync "java"))))
-
-(defn ensure-java!
-  "Ask user to install Java in order to use the JVM ClojureScript compiler."
-  []
-  (or (java-installed?)
-      (exit-error "Please install Java.")))
 
 (defn ensure-cljs-version!
   "Download the ClojureScript compiler uberjar for the version given in config."
@@ -124,9 +120,8 @@
   resulting list of JARs to our current dependency config in a cache to avoid
   this expensive task when possible."
   []
-  (ensure-java!)
   (let [deps (apply concat (map config dep-keys))
-        result (spawn-sync "java"
+        result (spawn-sync java-path
                  #js["-jar" file-dep-retriever (pr-str deps)]
                  #js{:stdio #js["pipe" "pipe" 2]})
         stdout-lines (when-let [output (.-stdout result)]
@@ -162,7 +157,6 @@
      - *build-config*      (specific build config, if specified)
      - *command-line-args* (as usual)"
   [& {:keys [build-id script-path args]}]
-  (ensure-java!)
   (let [build (when build-id (-> (ensure-build! build-id)
                                  (assoc :id build-id)))
         src (or (:src build) (all-sources))
@@ -173,7 +167,7 @@
                  "  (def ^:dynamic *build-config* " build ")"
                  "  nil)")
         args (concat ["-cp" cp "clojure.main" "-e" onload script-path] args)]
-    (spawn-sync "java" (clj->js args) #js{:stdio "inherit"})))
+    (spawn-sync java-path (clj->js args) #js{:stdio "inherit"})))
 
 ;;---------------------------------------------------------------------------
 ;; Lumo is the fastest way to run ClojureScript on Node.
