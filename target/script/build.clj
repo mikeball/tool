@@ -6,12 +6,13 @@
 (println "Building ...")
 
 (let [start (System/nanoTime)
-      {:keys [src compiler]} *build-config*]
+      {:keys [src compiler]} *build-config*
+      source (if (sequential? src) (apply b/inputs src) src)
+      opts (assoc compiler :watch-error-fn #(print-exception %))]
   (with-color
     (binding [cljs.analyzer/*cljs-warning-handlers* [(warning-message-handler identity)]]
       (try
-        (b/build src
-          (assoc compiler :watch-error-fn #(print-exception %)))
+        (b/build source opts)
         (catch Throwable e
           (print-exception e))))
     (println "... done. Elapsed" (/ (- (System/nanoTime) start) 1e9) "seconds")))

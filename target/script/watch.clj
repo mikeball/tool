@@ -3,8 +3,9 @@
          '[figwheel-sidecar.build-middleware.notifications :refer [warning-message-handler]]
          '[strictly-specking-standalone.ansi-util :refer [with-color]])
 
-(let [{:keys [src compiler]} *build-config*]
+(let [{:keys [src compiler]} *build-config*
+      source (if (sequential? src) (apply b/inputs src) src)
+      opts (assoc compiler :watch-error-fn #(print-exception %))]
   (with-color
     (binding [cljs.analyzer/*cljs-warning-handlers* [(warning-message-handler identity)]]
-      (b/watch src
-        (assoc compiler :watch-error-fn #(print-exception %))))))
+      (b/watch source opts))))
