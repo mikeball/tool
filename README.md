@@ -16,8 +16,6 @@ $ npm install cljs/tool -g
 
 This installs a `cljs` command, which is the abbreviation for ClojureScript.
 
-Users will not be asked to install Java until required.
-
 ## Basics
 
 Using __[Lumo]__, fast experimenting is the default experience.
