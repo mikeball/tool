@@ -20,6 +20,7 @@
     "fs-extra": "0.28.0",
     "lumo-cljs": "^1.4.1",
     "node-jre": "0.2.0",
+    "request": "2.81.0",
     "sync-request": "3.0.0"
   }
 }

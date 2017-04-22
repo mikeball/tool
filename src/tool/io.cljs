@@ -1,5 +1,6 @@
 (ns tool.io
   (:require
+    [cljs.core.async :refer [chan put!]]
     [cljs.reader :refer [read-string]]
     [clojure.string :refer [starts-with?]]))
 
@@ -7,9 +8,11 @@
 
 (def fs (js/require "fs"))
 (def fs-extra (js/require "fs-extra"))
-(def request (js/require "sync-request"))
+(def request-sync (js/require "sync-request"))
+(def request (js/require "request"))
 (def existsSync (js/require "exists-sync"))
 (def colors (js/require "colors/safe"))
+(def ProgressBar (js/require "progress"))
 
 (def request-opts
   #js{:headers
@@ -24,7 +27,7 @@
 
 (defn slurp [path]
   (if (url? path)
-    (.toString (.getBody (request "GET" path request-opts)))
+    (.toString (.getBody (request-sync "GET" path request-opts)))
     (when (path-exists? path)
       (.toString (.readFileSync fs path)))))
 
@@ -39,9 +42,28 @@
        (catch js/Error e nil)))
 
 (defn download [url path]
-  (let [response (request "GET" url request-opts)
+  (let [response (request-sync "GET" url request-opts)
         buffer (.getBody response)]
     (.writeFileSync fs path buffer)))
+
+(defn hook-progress-bar [req label]
+  (.on req "response"
+    (fn [response]
+      (let [total (js/parseInt (aget response "headers" "content-length") 10)
+            bar (ProgressBar. (str "Downloading " label "  [:bar] :percent :etas")
+                  #js{:complete "=" :incomplete " " :width 40 :total total})]
+        (.on response "data" #(.tick bar (.-length %)))
+        (.on response "end" #(println))))))
+
+(defn download-progress [url path label]
+  (let [file (.createWriteStream fs path)
+        req (request url)
+        c (chan)]
+    (hook-progress-bar req label)
+    (.pipe req file)
+    (.on req "error" #(do (.close file) (.exit js/process -1)))
+    (.on req "end" #(put! c 1))
+    c))
 
 (defn color [col text]
   (let [f (aget colors (name col))]

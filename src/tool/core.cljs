@@ -1,5 +1,8 @@
 (ns tool.core
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
   (:require
+    [cljs.core.async :refer [<!]]
     [clojure.string :as string]
     [cljs.pprint :refer [pprint]]
     [tool.io :as io]))
@@ -83,12 +86,12 @@
 (defn ensure-cljs-version!
   "Download the ClojureScript compiler uberjar for the version given in config."
   []
-  (let [version (:cljs-version config)
-        jar-path (file-cljs-jar version)
-        jar-url (url-cljs-jar version)]
-    (or (io/path-exists? jar-path)
-        (do (println "Downloading ClojureScript version" version)
-            (io/download jar-url jar-path)))))
+  (go
+    (let [version (:cljs-version config)
+          jar-path (file-cljs-jar version)
+          jar-url (url-cljs-jar version)]
+      (or (io/path-exists? jar-path)
+          (<! (io/download-progress jar-url jar-path (str "ClojureScript " version)))))))
 
 (defn ensure-config!
   "Ask user to create a cljs.edn config file."
@@ -251,14 +254,15 @@
     (do
       (print-welcome)
       (ensure-config!)
-      (ensure-cljs-version!)
-      (cond
-        (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
-        (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
-        (= task "repl") (run-api-script :script-path file-repl-script)
-        (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
-        (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
-        :else (exit-error "Unrecognized task:" task)))))
+      (go
+        (<! (ensure-cljs-version!))
+        (cond
+          (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
+          (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
+          (= task "repl") (run-api-script :script-path file-repl-script)
+          (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
+          (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
+          :else (exit-error "Unrecognized task:" task))))))
 
 (set! *main-cli-fn* -main)
 (enable-console-print!)

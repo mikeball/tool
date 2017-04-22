@@ -1,4 +1,5 @@
 {:cljs-version "1.9.521"
+ :dependencies [[org.clojure/core.async "0.3.442"]]
  :builds
  {:tool
   {:src "src"
