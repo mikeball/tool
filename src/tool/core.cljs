@@ -203,6 +203,8 @@
 ;; Lumo is the fastest way to run ClojureScript on Node.
 ;;---------------------------------------------------------------------------
 
+(def lumo-path (str js/__dirname "/../node_modules/.bin/lumo"))
+
 (defn build-lumo-args
   "We add args when calling lumo in order to integrate config file settings."
   [args]
@@ -216,9 +218,8 @@
 (defn run-lumo
   "Lumo is an executable published on npm for running a REPL or a file."
   [args]
-  (let [npmRun (js/require "npm-run")
-        lumo-args (build-lumo-args args)]
-    (npmRun.spawnSync "lumo" lumo-args #js{:stdio "inherit"})))
+  (let [lumo-args (build-lumo-args args)]
+    (spawn-sync lumo-path lumo-args #js{:stdio "inherit"})))
 
 ;;---------------------------------------------------------------------------
 ;; Entry
