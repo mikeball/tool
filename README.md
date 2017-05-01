@@ -14,8 +14,6 @@ This installs the `cljs` command:
 
 ```
 $ npm install -g cljs/tool
-or
-$ yarn global add cljs/tool
 ```
 
 _\* cljs is the abbreviation for ClojureScript_
