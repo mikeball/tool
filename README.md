@@ -10,11 +10,15 @@ A tool to answer the following questions:
 
 ## Install
 
+This installs the `cljs` command:
+
 ```
-$ npm install cljs/tool -g
+$ npm install -g cljs/tool
+or
+$ yarn global add cljs/tool
 ```
 
-This installs a `cljs` command, which is the abbreviation for ClojureScript.
+_\* cljs is the abbreviation for ClojureScript_
 
 ## Basics
 
