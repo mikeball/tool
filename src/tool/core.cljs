@@ -259,7 +259,7 @@
         (cond
           (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
           (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
-          (= task "repl") (run-api-script :script-path file-repl-script)
+          (= task "repl") (run-api-script :build-id (first args) :script-path file-repl-script)
           (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
           (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
           :else (exit-error "Unrecognized task:" task))))))
