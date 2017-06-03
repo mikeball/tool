@@ -10,7 +10,6 @@
 (def fs-extra (js/require "fs-extra"))
 (def request-sync (js/require "sync-request"))
 (def request (js/require "request"))
-(def existsSync (js/require "exists-sync"))
 (def colors (js/require "colors/safe"))
 (def ProgressBar (js/require "progress"))
 
@@ -23,7 +22,7 @@
       (starts-with? path "https://")))
 
 (defn path-exists? [path]
-  (existsSync path))
+  (.existsSync fs path))
 
 (defn slurp [path]
   (if (url? path)
