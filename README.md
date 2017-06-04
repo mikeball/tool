@@ -130,19 +130,35 @@ Specify extra config for compiler:
                    :compiler {:output-to "main.js"}}}} ;; <-- compiler options
   ```
 
-- Build or watch
+- Build or watch (using the production JVM compiler)
 
-  ```sh
-  $ cljs build main
-  $ cljs watch main
+  <pre>
+  $ cljs build      # using this <a href="https://github.com/cljs/tool/blob/master/target/script/build.clj">build</a> script
+  $ cljs watch      # using this <a href="https://github.com/cljs/tool/blob/master/target/script/watch.clj">watch</a> script
+  </pre>
+
+- Pretty errors (borrowed from __[Figwheel]__)
+
+  ```clojure
+  ;; modify src/example/core.cljs
+  (ns example.core)
+
+  (defn hello)  ;; <-- make an incomplete function
   ```
 
-- Pretty errors _by [Figwheel Sidecar]_
+  ```
+  Compiling src/foo/core.cljs
+  ----  Could not Analyze  src/foo/core.cljs   line:3  column:1  ----
 
-  <img src="img/cljs-error.png" width="650">
+    Parameter declaration missing
 
-Rather than using Lumo, we use the fast ClojureScript compiler optimized for the JVM,
-with better default errors and warnings provided by [Figwheel Sidecar].
+    1  (ns example.core)
+    2
+    3  (defn hello)
+       ^--- Parameter declaration missing
+
+  ----  Analysis Error : Please see src/foo/core.cljs  ----
+  ```
 
 ## Develop for the web
 
