@@ -2,8 +2,10 @@
 /.deps-cache.edn
 /out/
 /.cljs_node_repl
-/target/cljs-*.jar
 *.swp
 
 /public/out
 /public/main.js
+
+# dry publish files
+cljs-*.tgz
