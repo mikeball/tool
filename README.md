@@ -13,7 +13,7 @@ A tool to answer the following questions:
 This installs the `cljs` command:
 
 ```
-$ npm install -g cljs/tool
+$ npm install -g cljs
 ```
 
 _\* cljs is the abbreviation for ClojureScript_
