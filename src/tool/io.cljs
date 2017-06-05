@@ -58,16 +58,22 @@
   (let [partial-path (str path ".partial")
         file (.createWriteStream fs partial-path)
         req (request url)
-        c (chan)]
+        done-chan (chan)]
     (hook-progress-bar req label)
     (.pipe req file)
     (.on req "error"
-      #(do (.close file)
-           (.exit js/process -1)))
+      (fn []
+        (println "Download failed! Please try again.")
+        (.exit js/process -1)))
     (.on req "end"
-      #(do (.moveSync fs-extra partial-path path)
-           (put! c 1)))
-    c))
+      (fn []
+        ;; Flush everything to the file so we can immediately access it.
+        (.end file)))
+    (.on file "finish"
+      (fn []
+        (.moveSync fs-extra partial-path path)
+        (put! done-chan 1)))
+    done-chan))
 
 (defn color [col text]
   (let [f (aget colors (name col))]
