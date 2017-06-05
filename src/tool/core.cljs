@@ -22,6 +22,9 @@
 
 (def config nil)
 
+(def default-cljs-version "1.9.562")
+(def default-fig-version "0.5.10")
+
 (defn transform-builds
   "Add :id to each build"
   [builds]
@@ -33,7 +36,9 @@
 (defn transform-config
   [cfg]
   (cond-> cfg
-    (:builds cfg) (update :builds transform-builds)))
+    (:builds cfg) (update :builds transform-builds)
+    true          (update :cljs-version #(or % default-cljs-version))
+    true          (update :figwheel-version #(or % default-fig-version))))
 
 (defn load-config! []
   (when (io/path-exists? file-config-edn)
@@ -55,16 +60,12 @@
 (defn file-cljs-jar [version] (str js/__dirname "/cljs-" version ".jar"))
 (defn url-cljs-jar [version] (str "https://github.com/clojure/clojurescript/releases/download/r" version "/cljs.jar"))
 
-;; We build/host our own AOT'd uberjar for figwheel sidecar
-;; (FIXME: find a better way to host this, though changes may be infrequent
-;;  since we are only using it for pretty errors/warnings, or move it to own
-;;  error/warning prettier repo)
 (defn file-fig-jar [version] (str js/__dirname "/figwheel-sidecar-" version ".jar"))
-(def fig-version "0.5.8")
+(defn url-fig-jar [version] (str "https://github.com/cljs/figwheel-sidecar/releases/download/v" version "/figwheel-sidecar.jar"))
 
 (defn get-jvm-jars []
   [(file-cljs-jar (:cljs-version config))
-   (file-fig-jar fig-version)])
+   (file-fig-jar (:figwheel-version config))])
 
 ;;---------------------------------------------------------------------------
 ;; Misc
@@ -92,6 +93,16 @@
           jar-url (url-cljs-jar version)]
       (or (io/path-exists? jar-path)
           (<! (io/download-progress jar-url jar-path (str "ClojureScript " version)))))))
+
+(defn ensure-fig-version!
+  "Download the Figwheel Sidecar uberjar for the version given in config."
+  []
+  (go
+    (let [version (:figwheel-version config)
+          jar-path (file-fig-jar version)
+          jar-url (url-fig-jar version)]
+      (or (io/path-exists? jar-path)
+          (<! (io/download-progress jar-url jar-path (str "Figwheel Sidecar " version)))))))
 
 (defn ensure-config!
   "Ask user to create a cljs.edn config file."
@@ -256,6 +267,8 @@
       (ensure-config!)
       (go
         (<! (ensure-cljs-version!))
+        (when (#{"build" "watch" "figwheel"} task)
+          (<! (ensure-fig-version!)))
         (cond
           (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
           (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
