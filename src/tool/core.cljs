@@ -10,7 +10,7 @@
 ;; Filenames of dependent resources
 (def file-config-edn "cljs.edn")
 (def file-deps-cache ".deps-cache.edn")
-(def file-dep-retriever (str js/__dirname "/cdr.jar"))
+(def file-dep-retriever (str js/__dirname "/dep-retriever.jar"))
 (def file-build-script (str js/__dirname "/script/build.clj"))
 (def file-watch-script (str js/__dirname "/script/watch.clj"))
 (def file-repl-script (str js/__dirname "/script/repl.clj"))
