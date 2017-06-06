@@ -2,7 +2,7 @@
  :dependencies [[org.clojure/core.async "0.3.442"]]
  :builds
  {:tool
-  {:src "src"
+  {:src ["src" "test"]
    :compiler {:target :nodejs
               :optimizations :simple
               :output-to "target/tool.js"}}

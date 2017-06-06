@@ -14,6 +14,7 @@
 (def file-build-script (str js/__dirname "/script/build.clj"))
 (def file-watch-script (str js/__dirname "/script/watch.clj"))
 (def file-repl-script (str js/__dirname "/script/repl.clj"))
+(def file-test-script (str js/__dirname "/script/test.clj"))
 (def file-figwheel-script (str js/__dirname "/script/figwheel.clj"))
 
 ;;---------------------------------------------------------------------------
@@ -273,6 +274,16 @@
           (= task "build") (run-api-script :build-id (first args) :script-path file-build-script)
           (= task "watch") (run-api-script :build-id (first args) :script-path file-watch-script)
           (= task "repl") (run-api-script :build-id (first args) :script-path file-repl-script)
+
+
+          ; should this run this directly in nodejs?
+          ; do we need to kick off build first as well?
+          (= task "test") (run-api-script :build-id (first args) :script-path file-test-script)
+
+
+
+
+
           (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
           (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
           :else (exit-error "Unrecognized task:" task))))))
