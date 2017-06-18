@@ -218,7 +218,7 @@
 ;; Lumo is the fastest way to run ClojureScript on Node.
 ;;---------------------------------------------------------------------------
 
-(def lumo-path (str js/__dirname "/../node_modules/.bin/lumo"))
+(def lumo-path (str js/__dirname "./node_modules/.bin/lumo"))
 
 (defn build-lumo-args
   "We add args when calling lumo in order to integrate config file settings."
@@ -235,6 +235,15 @@
   [args]
   (let [lumo-args (build-lumo-args args)]
     (spawn-sync lumo-path lumo-args #js{:stdio "inherit"})))
+
+
+
+
+(defn run-tests [args]
+  (println "now starting run tests..."))
+  ; compile test build
+  ; run tests build
+
 
 ;;---------------------------------------------------------------------------
 ;; Entry
@@ -278,14 +287,17 @@
 
           ; should this run this directly in nodejs?
           ; do we need to kick off build first as well?
-          (= task "test") (run-api-script :build-id (first args) :script-path file-test-script)
-
+          (= task "test")
+          (println "not yet implemented!")
 
 
 
 
           (= task "figwheel") (run-api-script :build-id (first args) :script-path file-figwheel-script)
           (string/ends-with? task ".clj") (run-api-script :script-path task :args args)
+
+
+
           :else (exit-error "Unrecognized task:" task))))))
 
 (set! *main-cli-fn* -main)

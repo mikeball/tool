@@ -1,11 +1,44 @@
 {:cljs-version "1.9.562"
  :dependencies [[org.clojure/core.async "0.3.442"]]
+
  :builds
  {:tool
+  {:src ["src"]
+   :compiler {:main "tool.core"
+              :target :nodejs
+              :optimizations :simple
+              :output-to "target/tool2.js"}}
+
+  :tool-test
+  {:src ["src" "test"]
+   :compiler {:main "tool.test-runner"
+              :target :nodejs
+              :optimizations :none
+
+              ; I had to output to top level directory because the
+              ; generated closure files did not handle the relative directory
+              ; paths when compiled with optimizations :none
+              ; we want :none because it's twice as fast as :simple
+              :output-to "tool-test.js"}}
+
+              
+              ; :output-dir "target"}}
+              ; :output-to "target/tool-test.js"}}
+
+  ; hypothetical compiler config
+  :tool-dev
   {:src ["src" "test"]
    :compiler {:target :nodejs
-              :optimizations :simple
-              :output-to "target/tool.js"}}
+              :optimizations :none
+              :outputs [{:main "tool.core" :file "tool.js"}
+                        {:main "tool.test-runner" :file "tool-test.js"}]}}
+
+  ; the line in clojure compiler that generates the main for a js file
+  ; https://github.com/clojure/clojurescript/blob/00c9aec4103c6b13302e40a4cf5cdebea36dfd50/src/main/clojure/cljs/closure.clj#L1484
+
+
+
+
 
   :example
   {:src "src-example"
